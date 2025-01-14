@@ -38,7 +38,7 @@ const Recetas = () => {
         },
         body: JSON.stringify(receta)
       })
-      let data = await response.json();
+      //  let data = await response.json();
 
       if(response.ok){
         await fetchRecetas();
@@ -65,7 +65,7 @@ const Recetas = () => {
           {/* Recipe Cards */}
 
           {isLoading && <p>Loading...</p>}
-          {recetas && recetas.map((receta) => (<RecipeCard key={receta.id} receta={receta} />))}
+          {recetas && recetas.map((receta) => (<RecipeCard key={receta.id} receta={{ ...receta, onDelete: async () => await fetchRecetas() }} />))}
 
         </div>
       </div>
