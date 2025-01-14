@@ -11,22 +11,49 @@ const Recetas = () => {
   const [ recetas, setRecetas ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
 
-  useEffect(() => {
-    const fetchRecetas = async () => {
-      setIsLoading(true);
+  const [ campos, setCampos ] = useState(['name', 'descripcion', 'time', 'difficulty', 'image']);
+  const [ newReceta, setNewReceta ] = useState({});
 
-      try {
-        const response = await fetch(urlApi);
-        const data = await response.json();
-        setRecetas(data.recetas);
-      } catch (error) {
-        console.log("Error: ", error);
-      } finally {
-        setIsLoading(false);
+  const fetchRecetas = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(urlApi);
+      const data = await response.json();
+      setRecetas(data.recetas);
+    } catch (error) {
+      console.log("Error: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const crearReceta = async (receta) => {
+
+    try{
+      let response = await  fetch(urlApi, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(receta)
+      })
+      let data = await response.json();
+
+      if(response.ok){
+        await fetchRecetas();
+        setNewReceta({});
+        setIsOpen(false);
       }
-    };
-    fetchRecetas();
 
+    }catch(error){
+      console.error('Error:', error);
+    }
+
+  };
+
+  useEffect(() => {
+    fetchRecetas();
   }, []);
 
   return (
@@ -48,11 +75,17 @@ const Recetas = () => {
           <i className="fa-solid fa-plus"></i>
         </div>
       </button>
-      <Modal isOpen={isOpen} title={"Nueva Receta"} onClose={() => setIsOpen(false)} onConfirm={() => console.log("Hola Santi!")}>
-        <div>
-          <label>Nombre</label>
-          <input type="text" placeholder="Nombre" />
-        </div>
+      <Modal isOpen={isOpen} title={"Nueva Receta"} onClose={() => setIsOpen(false)} onConfirm={() => crearReceta(newReceta)}>
+        {
+          campos.map((campo) => (<div key={'form-'+campo} className="flex flex-row">
+            <label className="w-1/2">{campo}</label>
+            <input className="w-1/2" type="text" placeholder={campo}
+              value={newReceta[campo] || ''} 
+              onChange={(event) => setNewReceta({ ...newReceta, [campo]: event.target.value })} 
+            />
+          </div>
+          ))
+        }
       </Modal>
     </>
   );
